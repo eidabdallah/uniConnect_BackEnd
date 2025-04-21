@@ -5,7 +5,7 @@ export const connectDB = async () => {
      try {
           await mongoose.connect(process.env.DB);
 
-          const adminExists = await userModel.findOne({ role: 'admin' });
+          const adminExists = await userModel.findOne({ role: 'superAdmin' });
           if (!adminExists) {
                const adminUser = new userModel({
                     userName: "superAdmin",
