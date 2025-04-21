@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import userModel from './../../DB/model/user.model.js';
 import { AppError } from './../utils/AppError.js';
+import userModel from '../../DB/model/user.model.js';
 
 export const roles = {
     SUPERADMIN: 'superAdmin',
