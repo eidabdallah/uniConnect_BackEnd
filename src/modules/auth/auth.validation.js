@@ -16,3 +16,8 @@ export const registerSchema = Joi.object({
     }),
     profileImage: generalFields.image.optional(),
 });
+
+export const loginSchema = Joi.object({
+    universityId: generalFields.universityId,
+    password: generalFields.password,
+});
