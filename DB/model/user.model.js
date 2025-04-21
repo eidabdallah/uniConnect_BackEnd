@@ -20,7 +20,7 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
-        required: true,
+        unique: true,
     },
     password: {
         type: String,
@@ -30,8 +30,8 @@ const userSchema = new Schema({
         type: String,
     },
     profileImage: {
-        type: String,
-        default: ''
+        type: Object,
+        default: 'https://res.cloudinary.com/deylqxzgk/image/upload/c_thumb,w_200,g_face/v1745223326/th_jiostr.jpg'
     },
     bio: {
         type: String,
