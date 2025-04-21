@@ -9,3 +9,6 @@ export const checkUniversityIdExists = async (universityId) => {
 export const registerUser = async (userData) => {
     return await userModel.create(userData);
 };
+export const confirmUserEmail = async (email) => {
+    return await userModel.findOneAndUpdate({ email }, { confirmEmail: true }, { new: true });
+};

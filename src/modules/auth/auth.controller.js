@@ -1,9 +1,9 @@
 import { AppError } from "../../utils/AppError.js";
-import { checkEmailExists, checkUniversityIdExists, registerUser } from "./auth.service.js";
+import { checkEmailExists, checkUniversityIdExists, confirmUserEmail, registerUser } from "./auth.service.js";
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
 import cloudinary from './../../utils/cloudinary.js';
 import bcrypt from 'bcryptjs';
-import { sendConfirmationEmail } from "../../utils/emailTemplates.js";
+import { confirmEmailMessage, sendConfirmationEmail } from "../../utils/emailTemplates.js";
 import jwt from 'jsonwebtoken';
 
 export const register = async (req, res, next) => {
@@ -34,7 +34,6 @@ export const register = async (req, res, next) => {
     const response = new AppResponse('User registered successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
-
 export const login = async (req, res, next) => {
     const { universityId, password } = req.body;
     const user = await checkUniversityIdExists(universityId);
@@ -52,4 +51,12 @@ export const login = async (req, res, next) => {
 
     const response = new AppResponse('Logged in successfully', token, 200, 'token');
     return globalSuccessHandler(response, req, res);
+}
+export const confirmEmail = async (req, res, next) => {
+    const { token } = req.params;
+    if (!token) return next(new AppError("Token is required", 400));
+    const decodedToken = jwt.verify(token, process.env.JWT_ConfirmEmail_SECRET);
+    const user = await confirmUserEmail(decodedToken.email);
+    if (!user) return next(new AppError("User not found or already confirmed", 404));
+    await confirmEmailMessage(user.userName, res);
 }

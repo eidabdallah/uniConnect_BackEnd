@@ -9,6 +9,6 @@ const router = Router();
 
 router.post('/register', fileUpload(fileMimeTypes.image).single('image'),validation(registerSchema), asyncHandler(controller.register));
 router.post('/login', validation(loginSchema), asyncHandler(controller.login));
-
+router.get('/confirmEmail/:token' , asyncHandler(controller.confirmEmail));
 
 export default router;
