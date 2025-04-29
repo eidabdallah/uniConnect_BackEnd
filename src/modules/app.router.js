@@ -5,9 +5,13 @@ import { AppError, globalhandleError } from '../utils/AppError.js';
 import authRouter from './auth/auth.router.js';
 import adminRouter from './admin/admin.router.js';
 import userRouter from './user/user.router.js';
+import cleanupSendCodes from '../utils/clearSendCode.js';
+import deleteUnconfirmedAccounts from '../utils/accountCleanup.js';
 
 export const initApp = async (app, express) => {
     connectDB();
+    deleteUnconfirmedAccounts();
+    cleanupSendCodes();
     app.use(cors());
     app.use(express.json());
     app.get('/', (req, res) => {
