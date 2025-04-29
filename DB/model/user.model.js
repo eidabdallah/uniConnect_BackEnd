@@ -12,12 +12,14 @@ const userSchema = new Schema({
         validate: {
             validator: function (value) {
                 if (this.role === 'student') return /^\d{8}$/.test(value);
-                if (this.role === 'doctor') return /^\d{4}$/.test(value);
+                if (this.role === 'doctor') return /^\d{4}$/.test(value); 
                 return true;
             },
-            message: props => `Invalid university ID (${props.value}) for role: ${props.instance.role}`
+            message: function (props) {
+                return `Invalid university ID (${props.value}) for role: ${this.role}`;
+            }
         }
-    },
+    },    
     email: {
         type: String,
         unique: true,

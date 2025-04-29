@@ -28,3 +28,11 @@ export const updateRoleSchema = Joi.object({
       'string.base': 'Role must be a string'
     })
 });
+export const changeConfirmEmailSchema = Joi.object({
+    id: generalFields.id
+});
+export const UserCredentialsSchema = Joi.object({
+    id: generalFields.id,
+    universityId : generalFields.universityId,
+    password : generalFields.password,
+});
