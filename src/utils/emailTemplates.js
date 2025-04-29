@@ -65,7 +65,6 @@ export const sendConfirmationEmail = async (universityId, email, userName, req) 
     await sendConfirmEmail(targetEmail, userName, req);
   }
 }
-
 export const confirmEmailMessage = (name, res) => {
   const html = `
     <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
@@ -115,6 +114,58 @@ export const confirmEmailMessage = (name, res) => {
       </div>
     </div>
   `;
-
   return res.send(html);
+};
+
+export const sendCodeToEmail = async (email, code) => {
+  const html = `
+    <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05);">
+      <div style="text-align: center; padding-bottom: 20px;">
+        <img src="https://res.cloudinary.com/deylqxzgk/image/upload/c_thumb,w_200,g_face/v1745214611/image_px8lm1.jpg" 
+             alt="${process.env.APPNAME} Logo" 
+             style="width: 150px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;" />
+        <h1 style="color: #1e3a8a; font-size: 30px; font-weight: 700; margin: 0; letter-spacing: 1px;">Your Verification Code</h1>
+      </div>
+
+      <div style="background-color: #ffffff; border-radius: 15px; padding: 30px; text-align: center; position: relative; border: 1px solid #e0e7ff;">
+        <div style="position: absolute; top: 10px; left: 10px; opacity: 0.3;">
+          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5" cy="5" r="3" fill="#60a5fa"/>
+            <circle cx="25" cy="5" r="3" fill="#60a5fa"/>
+            <circle cx="45" cy="5" r="3" fill="#60a5fa"/>
+            <circle cx="5" cy="25" r="3" fill="#60a5fa"/>
+            <circle cx="25" cy="25" r="3" fill="#60a5fa"/>
+            <circle cx="45" cy="25" r="3" fill="#60a5fa"/>
+            <circle cx="5" cy="45" r="3" fill="#60a5fa"/>
+            <circle cx="25" cy="45" r="3" fill="#60a5fa"/>
+            <circle cx="45" cy="45" r="3" fill="#60a5fa"/>
+          </svg>
+        </div>
+
+        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+          Here is your code to reset your password.
+        </p>
+
+        <div style="background-color: #2563eb; color: #ffffff; padding: 12px 40px; font-size: 18px; font-weight: 600; display: inline-block; border-radius: 50px; box-shadow: 0 4px 15px rgba(37,99,235,0.3); margin: 20px 0;">
+          <p style="margin: 0; font-size: 24px; font-weight: bold;">${code}</p>
+        </div>
+
+        <p style="color: #6b7280; font-size: 15px; line-height: 1.6; margin: 0 0 30px;">
+          Please enter this code in the reset password page to proceed.
+        </p>
+
+        <p style="font-size: 12px; color: #9ca3af; margin: 20px 0 0; line-height: 1.5;">
+          If you did not request a password reset, please ignore this email. This code will expire automatically.
+        </p>
+      </div>
+
+      <div style="text-align: center; padding-top: 20px;">
+        <p style="font-size: 12px; color: #6b7280; margin: 0;">
+          © ${new Date().getFullYear()} ${process.env.APPNAME}. Let's Keep Connecting!
+        </p>
+      </div>
+    </div>
+  `;
+
+  await sendEmail(email, 'Reset Password', html);
 };

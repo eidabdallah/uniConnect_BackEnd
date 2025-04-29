@@ -26,3 +26,17 @@ export const changePasswordSchema = Joi.object({
     oldPassword : generalFields.password,
     newPassword : generalFields.password,
 });
+export const sendCodeSchema = Joi.object({
+    email : generalFields.email,
+    universityId : generalFields.universityId,
+});
+
+export const resetPasswordSchema = Joi.object({
+    universityId : generalFields.universityId,
+    email : generalFields.email,
+    password : generalFields.password,
+    code: Joi.string().required().length(6).messages({
+        "string.required": "Code field is required.",
+        "string.length": "Code is incorrect",
+    }),
+});

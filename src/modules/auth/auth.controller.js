@@ -3,8 +3,9 @@ import { checkEmailExists, checkUniversityIdExists, confirmUserEmail, registerUs
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
 import cloudinary from './../../utils/cloudinary.js';
 import bcrypt from 'bcryptjs';
-import { confirmEmailMessage, sendConfirmationEmail } from "../../utils/emailTemplates.js";
+import { confirmEmailMessage, sendCodeToEmail, sendConfirmationEmail } from "../../utils/emailTemplates.js";
 import jwt from 'jsonwebtoken';
+import { customAlphabet } from "nanoid";
 
 export const register = async (req, res, next) => {
     const { universityId } = req.body;
@@ -69,6 +70,34 @@ export const changePassword = async (req, res, next) => {
     if (!isMatch) return next(new AppError('Invalid old password', 403));
     user.password = bcrypt.hashSync(newPassword, parseInt(process.env.SALTROUND));
     await user.save();
-    return res.status(200).json({ message: 'Password changed successfully' });
+    const response = new AppResponse('Password changed successfully', null, 200);
+    return globalSuccessHandler(response, req, res);
 }
 
+export const sendCode = async (req, res, next) => {
+    const { email, universityId } = req.body;
+    const user = await checkUniversityIdExists(universityId);
+    if (!user) return next(new AppError('universityId not found', 404));
+    if (email != user.email) {
+        return next(new AppError('The email you entered does not match your university email. Please use your university-issued email to proceed', 404));
+    }
+    const code = customAlphabet('123456789abcdefghijklmnopqrstuvwxyz', 6)();
+    user.sendCode = code;
+    await user.save();
+    await sendCodeToEmail(email, code);
+    const response = new AppResponse('Code sent successfully', null, 200);
+    return globalSuccessHandler(response, req, res);
+}
+
+export const resetPassword = async (req, res, next) => {
+    const { universityId, email, password, code } = req.body;
+    const user = await checkUniversityIdExists(universityId);
+    if (!user) return next(new AppError('university Id not found', 404));
+    if (user.email != email) return next(new AppError('The Email not Correct', 404));
+    if (user.sendCode !== code) return next(new AppError('Invalid code', 403));
+    user.password = bcrypt.hashSync(password, parseInt(process.env.SALTROUND));
+    user.sendCode = null;
+    await user.save();
+    const response = new AppResponse('Password reset successfully', null, 200);
+    return globalSuccessHandler(response, req, res);
+}
