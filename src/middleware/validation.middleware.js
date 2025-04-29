@@ -1,11 +1,10 @@
 
 import Joi from 'joi';
 export const generalFields = {
-    id: Joi.number().integer().min(1).required().messages({
-        "number.base": "ID must be a number.",
-        "number.integer": "ID must be an integer.",
-        "number.min": "ID must be greater than 0.",
-        "any.required": "ID is required.",
+    id: Joi.string().hex().length(24).required().messages({
+        "string.hex": "ID must be a hexadecimal string.",
+        "string.length": "ID must be exactly 24 characters long.",
+        "any.required": "ID field is required.",
     }),
     universityId: Joi.string().pattern(/^\d{4}$|^\d{8}$/).required().messages({
         "string.pattern.base": "University ID must be either 4 or 8 digits.",
