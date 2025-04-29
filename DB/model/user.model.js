@@ -12,14 +12,14 @@ const userSchema = new Schema({
         validate: {
             validator: function (value) {
                 if (this.role === 'student') return /^\d{8}$/.test(value);
-                if (this.role === 'doctor') return /^\d{4}$/.test(value); 
+                if (this.role === 'doctor') return /^\d{4}$/.test(value);
                 return true;
             },
             message: function (props) {
                 return `Invalid university ID (${props.value}) for role: ${this.role}`;
             }
         }
-    },    
+    },
     email: {
         type: String,
         unique: true,
@@ -33,7 +33,10 @@ const userSchema = new Schema({
     },
     profileImage: {
         type: Object,
-        default: 'https://res.cloudinary.com/deylqxzgk/image/upload/c_thumb,w_200,g_face/v1745223326/th_jiostr.jpg'
+        default: {
+            secure_url: 'https://res.cloudinary.com/deylqxzgk/image/upload/c_thumb,w_200,g_face/v1745223326/th_jiostr.jpg',
+            public_id: ''
+        }
     },
     bio: {
         type: String,
@@ -50,7 +53,7 @@ const userSchema = new Schema({
         default: 'Active'
     },
     role: {
-        type: String, enum: ['student', 'doctor', 'admin' , 'superAdmin'],
+        type: String, enum: ['student', 'doctor', 'admin', 'superAdmin'],
         required: true,
         default: 'student'
     },
