@@ -3,6 +3,8 @@ import { connectDB } from '../../DB/connection.js';
 import { AppResponse, globalSuccessHandler } from '../utils/responseHandler.js';
 import { AppError, globalhandleError } from '../utils/AppError.js';
 import authRouter from './auth/auth.router.js';
+import adminRouter from './admin/admin.router.js';
+
 export const initApp = async (app, express) => {
     connectDB();
     app.use(cors());
@@ -12,6 +14,7 @@ export const initApp = async (app, express) => {
         return globalSuccessHandler(response, req, res);
     });
     app.use('/auth', authRouter);
+    app.use('/admin' , adminRouter);
     app.use((req, res, next) => {
         return next(new AppError('Page Not Found', 404));
     });
