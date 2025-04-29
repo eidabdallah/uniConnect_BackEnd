@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { generalFields } from "../../middleware/validation.middleware.js";
 import { CollegesList } from './../../utils/enum/colleges.js';
+
 export const registerSchema = Joi.object({
     userName: generalFields.userName,
     email: generalFields.email.optional(),
@@ -16,8 +17,12 @@ export const registerSchema = Joi.object({
     }),
     profileImage: generalFields.image.optional(),
 });
-
 export const loginSchema = Joi.object({
     universityId: generalFields.universityId,
     password: generalFields.password,
+});
+export const changePasswordSchema = Joi.object({
+    universityId : generalFields.universityId,
+    oldPassword : generalFields.password,
+    newPassword : generalFields.password,
 });

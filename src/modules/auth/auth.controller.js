@@ -60,3 +60,15 @@ export const confirmEmail = async (req, res, next) => {
     if (!user) return next(new AppError("User not found or already confirmed", 404));
     await confirmEmailMessage(user.userName, res);
 }
+export const changePassword = async (req, res, next) => {
+    const { universityId, oldPassword, newPassword } = req.body;
+    if (req.user.universityId !== universityId) return next(new AppError('The university Id provided does not match your account.', 403));
+    const user = await checkUniversityIdExists(universityId);
+    if (!user) return next(new AppError('university Id not found', 404));
+    const isMatch = bcrypt.compareSync(oldPassword, user.password);
+    if (!isMatch) return next(new AppError('Invalid old password', 403));
+    user.password = bcrypt.hashSync(newPassword, parseInt(process.env.SALTROUND));
+    await user.save();
+    return res.status(200).json({ message: 'Password changed successfully' });
+}
+
