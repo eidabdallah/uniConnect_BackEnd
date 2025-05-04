@@ -1,24 +1,24 @@
-import { model, Schema, Types , mongoose} from 'mongoose';
+import { model, Schema, Types, mongoose } from 'mongoose';
 const notificationSchema = new Schema({
-  userId: { 
-    type: Types.ObjectId, 
-    ref: 'User', 
-    required: true 
+  userId: {
+    type: Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  message: { 
-    type: String, 
-    required: true 
+  content: {
+    type: String,
   },
-  isRead: { 
-    type: Boolean, 
-    default: false 
+  notificationType: {
+    type: String,
+    enum: ['message', 'post', 'friend_request', 'group_invitation'],
+    required: true
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
-}, { 
-  timestamps: true 
+  isRead: {
+    type: Boolean,
+    default: false
+  },
+}, {
+  timestamps: true
 });
 
 const notificationModel = mongoose.models.Notification || model('Notification', notificationSchema);
