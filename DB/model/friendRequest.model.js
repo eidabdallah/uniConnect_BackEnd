@@ -1,5 +1,5 @@
-import { model, Schema, Types } from 'mongoose';
-import { mongoose } from 'mongoose';
+import { model, Schema, Types , mongoose} from 'mongoose';
+
 const friendRequestSchema = new Schema({
     senderId: { type: Types.ObjectId, ref: 'User', required: true },
     receiverId: { type: Types.ObjectId, ref: 'User', required: true },

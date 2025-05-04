@@ -1,5 +1,4 @@
-import { model, Schema, Types } from 'mongoose';
-import { mongoose } from 'mongoose';
+import { model, Schema, Types , mongoose} from 'mongoose';
 const postSchema = new Schema({
     userId: {
         type: Types.ObjectId,
