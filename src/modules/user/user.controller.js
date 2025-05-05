@@ -1,15 +1,29 @@
 import { AppError } from "../../utils/AppError.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
-import { checkIdExists } from "./user.service.js";
+import { checkIdExists, getUserBySlug, getUserFriends, getUserPostsForProfile } from "./user.service.js";
 
-export const getUserById = async (req, res, next) => {
-    const user = await checkIdExists(req.user._id);
-    if (!user)
-        return next(new AppError('user not found', 404));
-    const response = new AppResponse(`user Info fetched successfully`, user, 200, 'user');
-    return globalSuccessHandler(response, req, res);
-}
+export const getUserProfile = async (req, res, next) => {
+  const userId = req.user._id;
+  const profileSlug = req.params.slug; 
+
+  const user = await getUserBySlug(profileSlug);
+    if (!user) return next(new AppError('User not found', 404));
+
+  const isOwner = userId.toString() === user._id.toString();
+
+  const posts = await getUserPostsForProfile(user._id, userId, isOwner);
+  const friends = await getUserFriends(user._id);
+
+  const response = new AppResponse('User info fetched successfully', {
+      user,
+      posts,
+      friends
+  }, 200 , 'info');
+
+  return globalSuccessHandler(response, req, res);
+};
+
 export const updateUserInfo = async (req, res, next) => {
     const {userName , bio} = req.body;
     const user = await checkIdExists(req.user._id);

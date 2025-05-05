@@ -1,8 +1,13 @@
-import { model, Schema , mongoose } from 'mongoose';
+import { model, Schema, mongoose } from 'mongoose';
 const userSchema = new Schema({
     userName: {
         type: String,
         required: true,
+    },
+    slug: {
+        type: String,
+        required: true,
+        unique: true
     },
     universityId: {
         type: String,

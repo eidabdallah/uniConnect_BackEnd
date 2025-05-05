@@ -9,7 +9,7 @@ import { fileMimeTypes, fileUpload } from "../../utils/multer.js";
 
 const router = Router();
 
-router.get('/', asyncHandler(auth(allUsers)), asyncHandler(controller.getUserById));
+router.get('/profile/:slug', asyncHandler(auth(allUsers)), asyncHandler(controller.getUserProfile));
 router.patch('/', asyncHandler(validation(updateUserInfoSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.updateUserInfo));
 router.patch('/changePic', fileUpload(fileMimeTypes.image).single('image'), asyncHandler(validation(changePicSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.updateUserPic));
 

@@ -1,5 +1,5 @@
 import { AppError } from "../../utils/AppError.js";
-import { checkEmailExists, checkUniversityIdExists, confirmUserEmail, registerUser } from "./auth.service.js";
+import { checkEmailExists, checkUniversityIdExists, confirmUserEmail, generateUniqueSlug, registerUser } from "./auth.service.js";
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
 import cloudinary from './../../utils/cloudinary.js';
 import bcrypt from 'bcryptjs';
@@ -30,6 +30,7 @@ export const register = async (req, res, next) => {
         });
         req.body.profileImage = { secure_url, public_id };
     }
+    req.body.slug = await generateUniqueSlug(req.body.userName);
     await registerUser(req.body);
     await sendConfirmationEmail(universityId, req.body.email, req.body.userName, req);
     const response = new AppResponse('User registered successfully', null, 201);
@@ -48,7 +49,7 @@ export const login = async (req, res, next) => {
     if (user.status === 'NotActive')
         return next(new AppError('Your account is blocked, contact support.', 403));
 
-    const token = jwt.sign({ id: user._id, role: user.role, status: user.status, isOnline: user.isOnline, profileImage: user.profileImage }, process.env.JWT_LOGIN_SECRET, { expiresIn: '10h' });
+    const token = jwt.sign({ id: user._id, role: user.role, status: user.status, isOnline: user.isOnline, profileImage: user.profileImage, slug: user.slug }, process.env.JWT_LOGIN_SECRET, { expiresIn: '10h' });
 
     const response = new AppResponse('Logged in successfully', token, 200, 'token');
     return globalSuccessHandler(response, req, res);

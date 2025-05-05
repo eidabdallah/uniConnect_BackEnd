@@ -1,6 +1,6 @@
 import { AppError } from "../../utils/AppError.js";
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
-import { checkEmailExists, checkIdExists, checkUniversityIdExists, getUsersByRole, registerAdmin } from "./admin.service.js";
+import { checkEmailExists, checkIdExists, checkUniversityIdExists, generateUniqueSlug, getUsersByRole, registerAdmin } from "./admin.service.js";
 import bcrypt from 'bcryptjs';
 
 export const getAllUsersByRole = async (req, res, next) => {
@@ -21,6 +21,7 @@ export const createAdmin = async (req, res, next) => {
         return next(new AppError('Email already Exist', 409));
     }
     req.body.role = 'admin';
+    req.body.slug = await generateUniqueSlug(req.body.userName);
     req.body.password = bcrypt.hashSync(req.body.password, parseInt(process.env.SALTROUND));
     await registerAdmin(req.body);
     const response = new AppResponse('Admin registered successfully', null, 201);

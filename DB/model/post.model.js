@@ -9,8 +9,13 @@ const postSchema = new Schema({
         type: String,
       },
       image: {
-        type: String,
+        type: Object,
       },
+      visibility: {
+        type: String,
+        enum: ['public', 'friends-only'],
+        default: 'public'
+      },      
       likes: [{
         type: Types.ObjectId,
         ref: 'User',
