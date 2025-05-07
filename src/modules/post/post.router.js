@@ -10,5 +10,5 @@ import { createPostSchema, getPostSchema } from "./post.validation.js";
 const router = Router();
 
 router.post('/', fileUpload(fileMimeTypes.image).single('image'), asyncHandler(validation(createPostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.createPost));
-router.get('/profile/:id', asyncHandler(validation(getPostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.getProfilePosts));
+router.get('/', asyncHandler(auth(allUsers)), asyncHandler(controller.getHomeFeed));
 export default router;

@@ -1,6 +1,6 @@
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
-import { createPostData, getFriendStatus, getUserOwnPosts, getUserProfilePosts } from "./post.service.js";
+import { createPostData, getFriendsIds, getGroupIds, getPostsByUserAndFriends } from "./post.service.js";
 
 export const createPost = async (req, res, next) => {
     req.body.userId = req.user._id;
@@ -14,18 +14,12 @@ export const createPost = async (req, res, next) => {
     const response = new AppResponse('create post successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
-export const getProfilePosts = async (req, res, next) => {
+export const getHomeFeed = async (req, res, next) => {
     const userId = req.user._id;
-    const profileId = req.params.id || userId;
-    if (userId.toString() === profileId.toString()) {
-        const posts = await getUserOwnPosts(profileId);
-        const response = new AppResponse('Your posts fetched successfully', posts, 200 , 'posts');
-        return globalSuccessHandler(response, req, res);
-    }
-    const friends = await getFriendStatus(userId, profileId);
-    const isFriend = friends.length > 0;
-    const posts = await getUserProfilePosts(profileId, isFriend);
-
-    const response = new AppResponse('Profile posts fetched successfully', posts, 200, 'posts');
+    const friendIds = await getFriendsIds(userId);
+    const groupIds = await getGroupIds(userId);
+    const userAndFriendsIds = [userId, ...friendIds, ...groupIds];
+    const posts = await getPostsByUserAndFriends(userAndFriendsIds);
+    const response = new AppResponse("Home feed fetched", posts, 200, 'posts');
     return globalSuccessHandler(response, req, res);
-}
+};
