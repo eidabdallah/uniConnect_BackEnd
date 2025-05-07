@@ -24,3 +24,24 @@ export const getPostsByUserAndFriends = async (userIds) => {
         visibility: { $in: ['public', 'friends-only'] }
     }).populate('userId', 'userName image').populate('groupId', 'name').sort({ createdAt: -1 });
 };
+export const checkPostExist = async (postId) => {
+    return await postModel.findById(postId);
+}
+export const isPostLikedByUser = async (postId, userId) => {
+    const post = await postModel.findOne({ _id: postId, likes: userId });
+    return !!post; // يرجع true إذا عمل لايك
+};
+
+export const addLikeToPost = async (postId, userId) => {
+    return await postModel.updateOne(
+        { _id: postId },
+        { $addToSet: { likes: userId } }
+    );
+};
+
+export const removeLikeFromPost = async (postId, userId) => {
+    return await postModel.updateOne(
+        { _id: postId },
+        { $pull: { likes: userId } }
+    );
+};

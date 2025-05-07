@@ -6,6 +6,6 @@ export const createPostSchema = Joi.object({
     visibility: Joi.string().valid('public', 'friends-only'),
     image: generalFields.image.optional(),
 });
-export const getPostSchema = Joi.object({
-    id: generalFields.id.optional(),
+export const likePostSchema = Joi.object({
+    id: generalFields.id,
 });
