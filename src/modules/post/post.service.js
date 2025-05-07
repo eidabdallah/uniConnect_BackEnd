@@ -29,7 +29,7 @@ export const checkPostExist = async (postId) => {
 }
 export const isPostLikedByUser = async (postId, userId) => {
     const post = await postModel.findOne({ _id: postId, likes: userId });
-    return !!post; // يرجع true إذا عمل لايك
+    return !!post; 
 };
 
 export const addLikeToPost = async (postId, userId) => {

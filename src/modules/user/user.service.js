@@ -7,7 +7,7 @@ export const checkIdExists = async (id) => {
 };
 export const getUserPostsForProfile = async (profileId, visitorId, isOwner) => {
     if (isOwner) {
-        return await postModel.find({ userId: profileId }).sort({ createdAt: -1 });
+        return await postModel.find({ userId: profileId, groupId: null }).populate('likes', 'userName profileImage').sort({ createdAt: -1 });
     }
 
     const isFriend = await friendRequestModel.exists({
@@ -22,8 +22,9 @@ export const getUserPostsForProfile = async (profileId, visitorId, isOwner) => {
 
     return await postModel.find({
         userId: profileId,
-        $or: visibilityConditions
-    }).sort({ createdAt: -1 });
+        $or: visibilityConditions,
+        groupId: null
+    }).populate('likes', 'userName profileImage').sort({ createdAt: -1 });
 };
 
 export const getUserFriends = async (userId) => {
@@ -38,7 +39,7 @@ export const getUserFriends = async (userId) => {
         req.senderId.toString() === userId.toString() ? req.receiverId : req.senderId
     );
 
-    return await userModel.find({ _id: { $in: friendIds } }, '-password').limit(3);
+    return await userModel.find({ _id: { $in: friendIds } }, '-password -sendCode -status -role -confirmEmail -createdAt -updatedAt').limit(3);
 };
 export const getUserBySlug = async (slug) => {
     return await userModel.findOne({ slug }).select('userName universityId college profileImage bio isOnline');
