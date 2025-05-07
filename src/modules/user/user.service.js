@@ -38,8 +38,8 @@ export const getUserFriends = async (userId) => {
         req.senderId.toString() === userId.toString() ? req.receiverId : req.senderId
     );
 
-    return await userModel.find({ _id: { $in: friendIds } }, '-password');
+    return await userModel.find({ _id: { $in: friendIds } }, '-password').limit(3);
 };
 export const getUserBySlug = async (slug) => {
-    return await userModel.findOne({ slug });
+    return await userModel.findOne({ slug }).select('userName universityId college profileImage bio isOnline');
 };
