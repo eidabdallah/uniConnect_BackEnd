@@ -1,4 +1,5 @@
 import { AppError } from "../../utils/AppError.js";
+import { sendConfirmationEmail } from "../../utils/emailTemplates.js";
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
 import { checkEmailExists, checkIdExists, checkUniversityIdExists, generateUniqueSlug, getUsersByRole, registerAdmin } from "./admin.service.js";
 import bcrypt from 'bcryptjs';
@@ -23,6 +24,7 @@ export const createAdmin = async (req, res, next) => {
     req.body.role = 'admin';
     req.body.slug = await generateUniqueSlug(req.body.userName);
     req.body.password = bcrypt.hashSync(req.body.password, parseInt(process.env.SALTROUND));
+    await sendConfirmationEmail(universityId, req.body.email, req.body.userName, req);
     await registerAdmin(req.body);
     const response = new AppResponse('Admin registered successfully', null, 201);
     return globalSuccessHandler(response, req, res);
