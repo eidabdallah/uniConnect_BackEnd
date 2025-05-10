@@ -1,6 +1,7 @@
 import groupModel from "../../../DB/model/group.model.js"
 import postModel from './../../../DB/model/post.model.js';
 import commentModel from './../../../DB/model/comment.model.js';
+import groupRequestModel from './../../../DB/model/groupRequest.model.js';
 import { nanoid } from "nanoid";
 
 export const checkNameExist = async (name) => {
@@ -56,4 +57,43 @@ export const getGroupsUsers = async (userId) => {
     return await groupModel.find({
         members: { $in: [userId] }
     }).select('name slug image')
+}
+export const checkExistingRequest = async (groupId, userId) => {
+    return await groupRequestModel.findOne({ groupId, userId });
+}
+export const createRequestForGroup = async (groupId, userId) => {
+    await groupRequestModel.create({ groupId, userId });
+
+}
+export const deleteRequestGroup = async (groupId, userId) => {
+    return await groupRequestModel.findOneAndDelete({
+        groupId,
+        userId,
+        status: 'pending'
+    });
+}
+export const getPendingUser = async (groupId) => {
+    return await groupRequestModel.find({ groupId, status: 'pending' })
+        .populate('userId', 'userName profileImage');
+}
+export const checkRequestExist = async (requestId) => {
+    return await groupRequestModel.findById(requestId).populate('groupId');
+}
+export const addUserToGroup = async (groupId, userId) => {
+    await groupModel.findByIdAndUpdate(groupId, {
+        $addToSet: { members: userId }
+    });
+}
+export const deleteRequestById = async (requestId) => {
+    await groupRequestModel.findByIdAndDelete(requestId);
+};
+export const leaveUser = async (groupId, id) => {
+    await groupModel.findByIdAndUpdate(groupId, {
+        $pull: { members: id }
+    });
+}
+export const deleteUser = async (groupId, memberId) => {
+    await groupModel.findByIdAndUpdate(groupId, {
+        $pull: { members: memberId }
+    });
 }

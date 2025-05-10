@@ -42,9 +42,6 @@ export const updateGroupSchema = Joi.object({
     }),
     image: generalFields.image.optional(),
 });
-export const deleteGroupSchema = Joi.object({
-    id: generalFields.id,
-});
 export const getGroupBySlugSchema = Joi.object({
     slug: Joi.string().min(1).max(100).required().messages({
         'string.min': 'Slug must be at least 1 character long',
@@ -52,4 +49,18 @@ export const getGroupBySlugSchema = Joi.object({
         'string.empty': 'Slug cannot be empty',
         'any.required': 'Slug is required'
     })
+});
+export const checkIdSchema = Joi.object({
+    groupId: generalFields.id
+});
+export const requestDecisionBodySchema = Joi.object({
+    action: Joi.string().valid('accepted', 'rejected').required().messages({
+        'any.only': 'Action must be either "accepted" or "rejected".',
+        'any.required': 'Action is required.'
+    }),
+    requestId: generalFields.id
+});
+export const removeMemberSchema = Joi.object({
+    groupId: generalFields.id,
+    memberId: generalFields.id
 });
