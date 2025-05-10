@@ -81,6 +81,9 @@ export const updatePostData = async (id, data) => {
 export const checkPostComment = async (id) => {
     return await commentModel.find({ postId: id });
 }
-export const deleteAllCommentForPost = async(id)=>{
+export const deleteAllCommentForPost = async (id) => {
     return await commentModel.deleteMany({ postId: id });
+}
+export const checkGroupExist = async (id) => {
+    return await groupModel.findById(id);
 }

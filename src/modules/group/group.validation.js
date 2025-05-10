@@ -42,3 +42,14 @@ export const updateGroupSchema = Joi.object({
     }),
     image: generalFields.image.optional(),
 });
+export const deleteGroupSchema = Joi.object({
+    id: generalFields.id,
+});
+export const getGroupBySlugSchema = Joi.object({
+    slug: Joi.string().min(1).max(100).required().messages({
+        'string.min': 'Slug must be at least 1 character long',
+        'string.max': 'Slug must be less than 100 characters',
+        'string.empty': 'Slug cannot be empty',
+        'any.required': 'Slug is required'
+    })
+});

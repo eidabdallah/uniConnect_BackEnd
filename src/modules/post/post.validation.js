@@ -13,6 +13,7 @@ export const createPostSchema = Joi.object({
         'string.base': 'Visibility must be a string.'
     }),
     image: generalFields.image.optional(),
+    groupId: generalFields.id.optional(),
 });
 export const likePostSchema = Joi.object({
     id: generalFields.id,

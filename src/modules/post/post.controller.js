@@ -1,7 +1,7 @@
 import { AppError } from "../../utils/AppError.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
-import { addLikeToPost, checkPostComment, checkPostExist, createPostData, deleteAllCommentForPost, deletedPost, getFriendsIds, getGroupIds, getPostsByUserAndFriends, isPostLikedByUser, removeLikeFromPost, updatePostData } from "./post.service.js";
+import { addLikeToPost, checkGroupExist, checkPostComment, checkPostExist, createPostData, deleteAllCommentForPost, deletedPost, getFriendsIds, getGroupIds, getPostsByUserAndFriends, isPostLikedByUser, removeLikeFromPost, updatePostData } from "./post.service.js";
 
 export const createPost = async (req, res, next) => {
     req.body.userId = req.user._id;
@@ -10,6 +10,18 @@ export const createPost = async (req, res, next) => {
             folder: `${process.env.APPNAME}/post/${req.user.universityId}`
         });
         req.body.image = { secure_url, public_id };
+    }
+    if (req.body.groupId) {
+        const group = await checkGroupExist(req.body.groupId);
+        if (!group) {
+            return next(new AppError("Group not found", 404));
+        }
+        if (group.type === 'private') {
+            const isMember = group.members.some(member => member.toString() === req.user._id.toString());
+            if (!isMember) {
+                return next(new AppError("You must be a group member to post", 403));
+            }
+        }
     }
     await createPostData(req.body);
     const response = new AppResponse('create post successfully', null, 201);
