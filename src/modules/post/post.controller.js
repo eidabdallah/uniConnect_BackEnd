@@ -29,11 +29,15 @@ export const likePost = async (req, res, next) => {
     const post = await checkPostExist(id);
     if (!post) return next(new AppError("Post not found", 404));
     const alreadyLiked = await isPostLikedByUser(id, userId);
+    let message;
     if (alreadyLiked) {
         await removeLikeFromPost(id, userId);
+        message = "Like removed successfully";
     } else {
         await addLikeToPost(id, userId);
+        message = "Post liked successfully";
     }
-    const response = new AppResponse("Post liked successfully", null, 200);
+
+    const response = new AppResponse(message, null, 200);
     return globalSuccessHandler(response, req, res);
 };
