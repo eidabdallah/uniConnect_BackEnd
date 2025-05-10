@@ -7,9 +7,12 @@ export const createCommentData = async (commentData) => {
 export const checkPostExist = async (postId) => {
     return await postModel.findById(postId);
 }
+export const checkCommentExist = async (commentId) => {
+    return await commentModel.findById(commentId);
+}
 export const isCommentLikedByUser = async (commentId, userId) => {
     const comment = await commentModel.findOne({ _id: commentId, likes: userId });
-    return !!comment; 
+    return !!comment;
 };
 export const addLikeToComment = async (commentId, userId) => {
     return await commentModel.updateOne(
@@ -24,3 +27,6 @@ export const removeLikeFromComment = async (commentId, userId) => {
         { $pull: { likes: userId } }
     );
 };
+export const deleteComemnt = async (id) => {
+    return await commentModel.findByIdAndDelete(id);
+}
