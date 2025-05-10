@@ -6,25 +6,46 @@ export const checkIdExists = async (id) => {
     return await userModel.findById(id).select('userName universityId email bio profileImage');
 };
 export const getUserPostsForProfile = async (profileId, visitorId, isOwner) => {
-    if (isOwner) {
-        return await postModel.find({ userId: profileId, groupId: null }).populate('likes', 'userName profileImage').sort({ createdAt: -1 });
-    }
-
-    const isFriend = await friendRequestModel.exists({
-        $or: [
-            { senderId: visitorId, receiverId: profileId, status: 'accepted' },
-            { senderId: profileId, receiverId: visitorId, status: 'accepted' }
-        ]
-    });
-
-    const visibilityConditions = [{ visibility: 'public' }];
-    if (isFriend) visibilityConditions.push({ visibility: 'friends-only' });
-
-    return await postModel.find({
+    const baseQuery = {
         userId: profileId,
-        $or: visibilityConditions,
         groupId: null
-    }).populate('likes', 'userName profileImage').sort({ createdAt: -1 });
+    };
+    if (!isOwner) {
+        const isFriend = await friendRequestModel.exists({
+            $or: [
+                { senderId: visitorId, receiverId: profileId, status: 'accepted' },
+                { senderId: profileId, receiverId: visitorId, status: 'accepted' }
+            ]
+        });
+
+        const visibilityConditions = [{ visibility: 'public' }];
+        if (isFriend) visibilityConditions.push({ visibility: 'friends-only' });
+        baseQuery["$or"] = visibilityConditions;
+    }
+    const posts = await postModel.find(baseQuery)
+        .populate('likes', 'userName profileImage')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'userId',
+                select: 'userName image'
+            }
+        })
+        .sort({ createdAt: -1 });
+    const postsWithLikeStatus = posts.map(post => {
+        const updatedComments = post.comments.map(comment => {
+            const likedByCurrentUser = comment.likes?.some(userId => userId.toString() === visitorId.toString());
+            return {
+                ...comment.toObject(),
+                likedByCurrentUser
+            };
+        });
+        return {
+            ...post.toObject(),
+            comments: updatedComments
+        };
+    });
+    return postsWithLikeStatus;
 };
 
 export const getUserFriends = async (userId) => {

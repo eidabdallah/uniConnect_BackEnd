@@ -9,3 +9,11 @@ export const createPostSchema = Joi.object({
 export const likePostSchema = Joi.object({
     id: generalFields.id,
 });
+export const deletePostSchema = Joi.object({
+    id: generalFields.id,
+});
+export const updatePostSchema = Joi.object({
+    id: generalFields.id,
+    image: generalFields.image.optional(),
+    content: Joi.string().min(1).max(1000).optional(),
+});

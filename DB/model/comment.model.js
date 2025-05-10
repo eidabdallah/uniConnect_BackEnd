@@ -20,7 +20,7 @@ const commentSchema = new Schema({
         ref: 'User'
     }],
     image: {
-        type: String,
+        type: Object,
     },
 }, {
     timestamps: true
