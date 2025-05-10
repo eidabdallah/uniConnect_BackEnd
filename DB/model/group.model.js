@@ -8,10 +8,9 @@ const groupSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,  
   },
   image: {
-    type: String,  
+    type: Object,  
   },
   ownerId: {
     type: Types.ObjectId,

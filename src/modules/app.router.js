@@ -7,6 +7,7 @@ import adminRouter from './admin/admin.router.js';
 import userRouter from './user/user.router.js';
 import postRouter from './post/post.router.js';
 import friendRouter from './friend/friend.router.js';
+import groupRouter from './group/group.router.js';
 import cleanupSendCodes from '../utils/clearSendCode.js';
 import deleteUnconfirmedAccounts from '../utils/accountCleanup.js';
 
@@ -25,6 +26,8 @@ export const initApp = async (app, express) => {
     app.use('/user' , userRouter);
     app.use('/post' , postRouter);
     app.use('/friend' , friendRouter);
+    app.use('/group' , groupRouter);
+
     
     app.use((req, res, next) => {
         return next(new AppError('Page Not Found', 404));
