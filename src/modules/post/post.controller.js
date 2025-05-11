@@ -1,7 +1,7 @@
 import { AppError } from "../../utils/AppError.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
-import { addLikeToPost, checkGroupExist, checkPostComment, checkPostExist, createPostData, deleteAllCommentForPost, deletedPost, getFriendsIds, getGroupIds, getPostsByUserAndFriends, isPostLikedByUser, removeLikeFromPost, updatePostData } from "./post.service.js";
+import { addLikeToPost, checkGroupExist, checkPostComment, checkPostExist, createPostData, deleteAllCommentForPost, deletedPost, getFriendsIds, getGroupIds, getPostsByUserAndFriends, getPostWithComments, isPostLikedByUser, removeLikeFromPost, updatePostData } from "./post.service.js";
 
 export const createPost = async (req, res, next) => {
     req.body.userId = req.user._id;
@@ -27,6 +27,15 @@ export const createPost = async (req, res, next) => {
     const response = new AppResponse('create post successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
+export const getPostById = async (req, res, next) => {
+    const { id } = req.params; 
+    const post = await getPostWithComments(id);
+    if (!post) return next(new AppError("Post not found", 404));
+
+    const response = new AppResponse("Post fetched successfully", post, 200, 'post');
+    return globalSuccessHandler(response, req, res);
+};
+
 export const getHomeFeed = async (req, res, next) => {
     const userId = req.user._id;
     const friendIds = await getFriendsIds(userId);

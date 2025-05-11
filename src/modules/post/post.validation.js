@@ -31,3 +31,6 @@ export const updatePostSchema = Joi.object({
         'string.max': 'Content cannot exceed 1000 characters.'
     }),
 });
+export const getPostByIdSchema = Joi.object({
+    id: generalFields.id,
+});

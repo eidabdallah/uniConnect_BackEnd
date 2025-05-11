@@ -6,6 +6,13 @@ import groupModel from './../../../DB/model/group.model.js';
 export const createPostData = async (postData) => {
     return await postModel.create(postData);
 };
+export const getPostWithComments = async (postId) => {
+    return await postModel.findById(postId)
+        .populate({
+            path: 'comments',
+            populate: { path: 'userId', select: 'userName' }
+        });
+};
 export const getFriendsIds = async (userId) => {
     const friendRequests = await friendRequestModel.find({
         status: 'accepted',
