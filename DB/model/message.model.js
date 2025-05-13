@@ -16,18 +16,6 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        default: null
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    isRead: {
-        type: Boolean,
-        default: false
-    }
 }, {
     timestamps: true
 });

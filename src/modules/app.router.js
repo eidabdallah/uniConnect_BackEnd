@@ -9,6 +9,7 @@ import postRouter from './post/post.router.js';
 import friendRouter from './friend/friend.router.js';
 import groupRouter from './group/group.router.js';
 import savedPost from './savedPost/savedPost.router.js';
+import messageRouter from './message/message.router.js';
 import cleanupSendCodes from '../utils/clearSendCode.js';
 import deleteUnconfirmedAccounts from '../utils/accountCleanup.js';
 
@@ -29,6 +30,7 @@ export const initApp = async (app, express) => {
     app.use('/friend' , friendRouter);
     app.use('/group' , groupRouter);
     app.use('/savedPost' , savedPost);
+    app.use('/message' , messageRouter);
     
     app.use((req, res, next) => {
         return next(new AppError('Page Not Found', 404));

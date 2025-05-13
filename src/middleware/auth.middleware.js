@@ -19,7 +19,7 @@ export const auth = (accessRoles = []) => {
         if (!decode) {
             return next(new AppError("Invalid token", 401));
         }
-        const user = await userModel.findById(decode.id).select('userName role email universityId isOnline');
+        const user = await userModel.findById(decode.id).select('userName role slug email universityId isOnline');
         if (!user) {
             return next(new AppError("User not found", 404));
         }
