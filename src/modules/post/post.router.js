@@ -9,11 +9,10 @@ import { createPostSchema, deletePostSchema, getPostByIdSchema, likePostSchema, 
 import commentRouter from '../comment/comment.router.js';
 const router = Router();
 router.use('/:postId/comment', commentRouter);
-router.post('/', fileUpload(fileMimeTypes.image).single('image'), asyncHandler(validation(createPostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.createPost));
+router.post('/', fileUpload(fileMimeTypes.image).fields([{ name: 'image', maxCount: 3 }]), asyncHandler(validation(createPostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.createPost));
 router.get('/', asyncHandler(auth(allUsers)), asyncHandler(controller.getHomeFeed));
-router.get('/:id', asyncHandler(validation(getPostByIdSchema)),asyncHandler(auth(allUsers)), asyncHandler(controller.getPostById));
+router.get('/:id', asyncHandler(validation(getPostByIdSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.getPostById));
 router.patch('/:id', asyncHandler(validation(likePostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.likePost));
 router.delete('/:id', asyncHandler(validation(deletePostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.deletePost));
-router.patch('/update/:id', fileUpload(fileMimeTypes.image).single('image'), asyncHandler(validation(updatePostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.updatePost));
-
+router.patch('/update/:id', fileUpload(fileMimeTypes.image).fields([{ name: 'image', maxCount: 3 }]), asyncHandler(validation(updatePostSchema)), asyncHandler(auth(allUsers)), asyncHandler(controller.updatePost));
 export default router;

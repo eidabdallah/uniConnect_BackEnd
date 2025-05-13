@@ -8,9 +8,9 @@ const postSchema = new Schema({
   content: {
     type: String,
   },
-  image: {
+  image: [{
     type: Object,
-  },
+  }],
   visibility: {
     type: String,
     enum: ['public', 'friends-only'],

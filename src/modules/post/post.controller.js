@@ -5,12 +5,6 @@ import { addLikeToPost, checkGroupExist, checkPostComment, checkPostExist, creat
 
 export const createPost = async (req, res, next) => {
     req.body.userId = req.user._id;
-    if (req.file) {
-        const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
-            folder: `${process.env.APPNAME}/post/${req.user.universityId}`
-        });
-        req.body.image = { secure_url, public_id };
-    }
     if (req.body.groupId) {
         const group = await checkGroupExist(req.body.groupId);
         if (!group) {
@@ -23,12 +17,22 @@ export const createPost = async (req, res, next) => {
             }
         }
     }
+    if (req.files && req.files.length > 0) {
+        const images = [];
+        for (const file of req.files) {
+            const { secure_url, public_id } = await cloudinary.uploader.upload(file.path, {
+                folder: `${process.env.APPNAME}/post/${req.user.universityId}`
+            });
+            images.push({ secure_url, public_id });
+        }
+        req.body.image = images;
+    }
     await createPostData(req.body);
     const response = new AppResponse('create post successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
 export const getPostById = async (req, res, next) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     const post = await getPostWithComments(id);
     if (!post) return next(new AppError("Post not found", 404));
 
@@ -76,8 +80,12 @@ export const deletePost = async (req, res, next) => {
         }
     }
     await deleteAllCommentForPost(id);
-    if (post.image?.public_id) {
-        await cloudinary.uploader.destroy(post.image.public_id);
+    if (post.image?.length > 0) {
+        for (const image of post.image) {
+            if (image?.public_id) {
+                await cloudinary.uploader.destroy(image.public_id);
+            }
+        }
     }
     await deletedPost(id);
     const response = new AppResponse("post delete Successfully", null, 200);
@@ -89,14 +97,22 @@ export const updatePost = async (req, res, next) => {
     if (!post) return next(new AppError("Post not found", 404));
     if (!post.userId.equals(req.user._id))
         return next(new AppError("Unauthorized", 403));
-    if (req.file) {
-        if (post.image?.public_id) {
-            await cloudinary.uploader.destroy(post.image.public_id);
+    if (req.files && req.files.length > 0) {
+        if (post.image?.length > 0) {
+            for (const image of post.image) {
+                if (image?.public_id) {
+                    await cloudinary.uploader.destroy(image.public_id);
+                }
+            }
         }
-        const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
-            folder: `${process.env.APPNAME}/post/${req.user.universityId}`
-        });
-        req.body.image = { secure_url, public_id };
+        const image = [];
+        for (const file of req.files) {
+            const { secure_url, public_id } = await cloudinary.uploader.upload(file.path, {
+                folder: `${process.env.APPNAME}/post/${req.user.universityId}`
+            });
+            image.push({ secure_url, public_id });
+        }
+        req.body.image = image;
     }
     const updatedPost = await updatePostData(id, req.body);
     const response = new AppResponse("Post updated successfully", updatedPost, 200, 'post');

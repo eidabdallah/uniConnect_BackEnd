@@ -12,7 +12,7 @@ export const createPostSchema = Joi.object({
         'any.only': 'Visibility must be either "public" or "friends-only".',
         'string.base': 'Visibility must be a string.'
     }),
-    image: generalFields.image.optional(),
+    image: Joi.array().items(generalFields.image).max(3).optional(),
     groupId: generalFields.id.optional(),
 });
 export const likePostSchema = Joi.object({
@@ -23,7 +23,7 @@ export const deletePostSchema = Joi.object({
 });
 export const updatePostSchema = Joi.object({
     id: generalFields.id,
-    image: generalFields.image.optional(),
+    image: Joi.array().items(generalFields.image).max(3).optional(),
     content: Joi.string().min(1).max(1000).optional().messages({
         'string.base': 'Content must be a string.',
         'string.empty': 'Content cannot be empty.',
