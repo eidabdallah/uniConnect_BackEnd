@@ -11,6 +11,7 @@ export const sendMessageController = async (req, res, next) => {
     }
     const message = await messageService.sendMessage({ senderId: sender._id, receiverId: receiver._id, content });
     const io = getIO();
+    // Emit the new message in real-time to all 
     io.emit('receiveMessage', {
         ...message.toObject(),
         senderName: sender.userName,
