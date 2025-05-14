@@ -31,6 +31,13 @@ export const getMessagesController = async (req, res, next) => {
         return res.status(400).json({ success: false, message: 'User not found' });
     }
     const messages = await messageService.getMessagesBetweenUsers(sender._id, receiver._id);
+    if (!messages || messages.length === 0) {
+        return res.status(200).json({
+            success: true,
+            messages: [],
+            message: 'No messages found between the users'
+        });
+    }
     const messagesWithNames = messages.map(message => ({
         ...message.toObject(),
         senderName: sender.userName,
