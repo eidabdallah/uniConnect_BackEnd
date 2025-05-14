@@ -10,16 +10,17 @@ export const sendMessageController = async (req, res, next) => {
         return res.status(400).json({ success: false, message: 'User not found' });
     }
     const message = await messageService.sendMessage({ senderId: sender._id, receiverId: receiver._id, content });
+    const populatedMessage = await message.populate([
+        { path: "senderId", select: "slug userName" },
+        { path: "receiverId", select: "slug userName" }
+    ]);
     const io = getIO();
     // Emit the new message in real-time to all 
-    io.to(sender.slug).to(receiver.slug).emit('receiveMessage', {
-        ...message.toObject(),
-        senderName: sender.userName,
-        receiverName: receiver.userName,
-        senderSlug: sender.slug,
-        receiverSlug: receiver.slug
-    });
-    return res.status(201).json({ success: true, message });
+    io.to(populatedMessage.senderId.slug)
+        .to(populatedMessage.receiverId.slug)
+        .emit('receiveMessage', populatedMessage);
+
+    return res.status(201).json({ success: true, message: populatedMessage });
 };
 export const getMessagesController = async (req, res, next) => {
     const senderSlug = req.user.slug;
@@ -38,13 +39,7 @@ export const getMessagesController = async (req, res, next) => {
             message: 'No messages found between the users'
         });
     }
-    const messagesWithNames = messages.map(message => ({
-        ...message.toObject(),
-        senderName: sender.userName,
-        receiverName: receiver.userName,
-        senderSlug: sender.slug,
-        receiverSlug: receiver.slug
-    }));
+    const messagesWithNames = messages.map(message => ({ ...message.toObject() }));
 
     return res.status(200).json({ success: true, messages: messagesWithNames });
 };
