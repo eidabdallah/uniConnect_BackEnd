@@ -17,10 +17,14 @@ export const initSocket = (server) => {
   io.on('connection', (socket) => {
     // console.log(`User connected: ${socket.id}`); // Optional: log the connected user's ID
 
+    socket.on('joinRoom', (userSlug) => {
+      socket.join(userSlug);
+    });
+
     // Listen for 'sendMessage' events from the client
     socket.on('sendMessage', (data) => {
-      console.log('Message received:', data);
-      io.emit('receiveMessage', data); // Broadcast the message to all connected clients
+      const { senderSlug, receiverSlug } = data;
+      io.to(senderSlug).to(receiverSlug).emit('receiveMessage', data);
     });
 
     // Listen for client disconnection
