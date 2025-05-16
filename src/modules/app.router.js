@@ -10,6 +10,7 @@ import friendRouter from './friend/friend.router.js';
 import groupRouter from './group/group.router.js';
 import savedPost from './savedPost/savedPost.router.js';
 import messageRouter from './message/message.router.js';
+import searchRouter from './search/search.router.js';
 import cleanupSendCodes from '../utils/clearSendCode.js';
 import deleteUnconfirmedAccounts from '../utils/accountCleanup.js';
 
@@ -24,17 +25,17 @@ export const initApp = async (app, express) => {
         return globalSuccessHandler(response, req, res);
     });
     app.use('/auth', authRouter);
-    app.use('/admin' , adminRouter);
-    app.use('/user' , userRouter);
-    app.use('/post' , postRouter);
-    app.use('/friend' , friendRouter);
-    app.use('/group' , groupRouter);
-    app.use('/savedPost' , savedPost);
-    app.use('/message' , messageRouter);
-    
+    app.use('/admin', adminRouter);
+    app.use('/user', userRouter);
+    app.use('/post', postRouter);
+    app.use('/friend', friendRouter);
+    app.use('/group', groupRouter);
+    app.use('/savedPost', savedPost);
+    app.use('/message', messageRouter);
+    app.use('/search', searchRouter);
     app.use((req, res, next) => {
         return next(new AppError('Page Not Found', 404));
     });
-    
+
     app.use(globalhandleError);
 };
