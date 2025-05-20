@@ -1,43 +1,60 @@
 import { Server } from 'socket.io';
-// Server: A class from the socket.io library.
-// Used to create a WebSocket server that enables real-time communication between the server and clients.
+import userModel from './../../DB/model/user.model.js';
+import notificationModel from '../../DB/model/notification.model.js';
 
-let io; // Declare a variable to store the socket.io instance
+let io;
 
 export const initSocket = (server) => {
-  // Initialize the socket.io server and attach it to the existing HTTP server
   io = new Server(server, {
     cors: {
-      origin: "*", // Allow all origins (you can restrict this in production)
-      methods: ["GET", "POST"] // Allowed HTTP methods
+      origin: "*",
+      methods: ["GET", "POST"]
     }
   });
 
-  // Listen for new client connections
   io.on('connection', (socket) => {
-    // console.log(`User connected: ${socket.id}`); // Optional: log the connected user's ID
-
     socket.on('joinRoom', (userSlug) => {
-      socket.join(userSlug);
+      if (!userSlug) return;
+      if (!socket.rooms.has(userSlug)) {
+        socket.join(userSlug);
+      }
     });
 
-    // Listen for 'sendMessage' events from the client
+
     socket.on('sendMessage', (data) => {
       const { senderSlug, receiverSlug } = data;
       io.to(senderSlug).to(receiverSlug).emit('receiveMessage', data);
     });
 
-    // Listen for client disconnection
+    socket.on('sendNotification', async (data) => {
+      try {
+        const { userId, content, notificationType } = data;
+
+        const newNotification = await notificationModel.create({
+          userId,
+          content,
+          notificationType
+        });
+
+        const user = await userModel.findById(userId).select('slug');
+        if (!user) return;
+
+        io.to(user.slug).emit('receiveNotification', newNotification);
+
+      } catch (error) {
+        console.error('❌ Error in sendNotification socket event:', error.message);
+      }
+    });
+
     socket.on('disconnect', () => {
-      // console.log('❌ User disconnected:', socket.id); // Optional: log when user disconnects
+      // console.log('❌ User disconnected:', socket.id);
     });
   });
 
-  return io; // Return the socket.io instance
+  return io;
 };
 
-// getIO: Used to access the initialized socket instance from anywhere in the project
 export const getIO = () => {
-  if (!io) throw new Error("Socket.io not initialized"); // Throw error if called before initialization
+  if (!io) throw new Error("Socket.io not initialized");
   return io;
 };
