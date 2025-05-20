@@ -1,5 +1,7 @@
+import notificationModel from "../../../DB/model/notification.model.js";
 import { AppError } from "../../utils/AppError.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
+import { getIO } from "../../utils/socket.js";
 import { cancelPendingFriendRequest, checkExistingFriendRequest, checkIdExists, checkRequestExists, getAcceptedFriendRequests, getAllFriendRequest, getUserDetailsByIds, sendNewFriendRequest, unfriendUser } from "./friend.service.js";
 
 export const getUserFriends = async (req, res, next) => {
@@ -28,6 +30,16 @@ export const createFriendRequest = async (req, res, next) => {
         return next(new AppError('Friend request already exists or is pending', 400));
     }
     const newRequest = await sendNewFriendRequest(senderId, receiverId);
+
+    const notification = await notificationModel.create({
+        userId: receiverId,
+        content: `${req.user.userName} sent you a friend request`,
+        notificationType: 'friend_request',
+    });
+
+    const io = getIO();
+    io.to(receiverExists.slug).emit('newNotification', notification);
+
     const response = new AppResponse('Friend request sent successfully', newRequest, 200, 'request');
     return globalSuccessHandler(response, req, res);
 };
@@ -49,6 +61,18 @@ export const respondToFriendRequest = async (req, res, next) => {
     }
     friendRequest.status = action;
     await friendRequest.save();
+
+
+    if (action === 'accepted') {
+        const sender = await checkIdExists(friendRequest.senderId);
+        const notification = await notificationModel.create({
+            userId: friendRequest.senderId,
+            content: `${req.user.userName} accepted your friend request`,
+            notificationType: 'friend_request',
+        });
+        const io = getIO();
+        io.to(sender.slug).emit('newNotification', notification);
+    }
 
     const response = new AppResponse('Friend request updated successfully', friendRequest, 200, 'request');
     return globalSuccessHandler(response, req, res);
