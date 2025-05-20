@@ -10,12 +10,8 @@ const notificationSchema = new Schema({
   },
   notificationType: {
     type: String,
-    enum: ['message', 'post', 'friend_request', 'group_invitation'],
+    enum: ['message', 'post', 'friend_request', 'group_join_request', 'group_request_response', 'Comment', 'Like'],
     required: true
-  },
-  isRead: {
-    type: Boolean,
-    default: false
   },
 }, {
   timestamps: true
