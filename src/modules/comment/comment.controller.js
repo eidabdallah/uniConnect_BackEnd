@@ -1,6 +1,8 @@
+import notificationModel from "../../../DB/model/notification.model.js";
 import { AppError } from "../../utils/AppError.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
+import { getIO } from "../../utils/socket.js";
 import { addLikeToComment, checkCommentExist, checkPostExist, createCommentData, deleteComemnt, isCommentLikedByUser, removeLikeFromComment } from "./comment.service.js";
 
 export const addComment = async (req, res, next) => {
@@ -15,12 +17,22 @@ export const addComment = async (req, res, next) => {
         req.body.image = { secure_url, public_id };
     }
     await createCommentData(req.body);
+    if (!req.user._id.equals(post.userId)) {
+        const notification = await notificationModel.create({
+            userId: post.userId._id,
+            content: `${req.user.userName} Comment on your post`,
+            notificationType: 'Comment'
+        });
+
+        const io = getIO();
+        io.to(post.userId.slug).emit('newNotification', notification);
+    }
     const response = new AppResponse('create comment successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
 export const likeComment = async (req, res, next) => {
     const userId = req.user._id;
-    const { postId , commentId } = req.params;
+    const { postId, commentId } = req.params;
     const post = await checkPostExist(postId);
     if (!post) return next(new AppError("Post not found", 404));
     const comment = await checkCommentExist(commentId);
@@ -32,13 +44,24 @@ export const likeComment = async (req, res, next) => {
         message = "Like removed successfully";
     } else {
         await addLikeToComment(commentId, userId);
+        if (!userId.equals(comment.userId._id)) {
+            const notification = await notificationModel.create({
+                userId: comment.userId._id,
+                content: `${req.user.userName} liked your comment`,
+                notificationType: 'Like'
+            });
+
+            const io = getIO();
+            io.to(comment.userId.slug).emit('newNotification', notification);
+        }
+
         message = "comment liked successfully";
     }
     const response = new AppResponse(message, null, 200);
     return globalSuccessHandler(response, req, res);
 };
-export const deleteComment = async(req , res , next)=>{
-    const { postId , commentId } = req.params;
+export const deleteComment = async (req, res, next) => {
+    const { postId, commentId } = req.params;
     const post = await checkPostExist(postId);
     if (!post) return next(new AppError("Post not found", 404));
     const comment = await checkCommentExist(commentId);

@@ -5,11 +5,12 @@ export const createCommentData = async (commentData) => {
     return await commentModel.create(commentData);
 };
 export const checkPostExist = async (postId) => {
-    return await postModel.findById(postId);
-}
+    return await postModel.findById(postId).populate('userId', 'slug userName');
+};
 export const checkCommentExist = async (commentId) => {
-    return await commentModel.findById(commentId);
-}
+    return await commentModel.findById(commentId).populate('userId', 'slug userName');
+};
+
 export const isCommentLikedByUser = async (commentId, userId) => {
     const comment = await commentModel.findOne({ _id: commentId, likes: userId });
     return !!comment;
