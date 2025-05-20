@@ -1,6 +1,8 @@
+import notificationModel from "../../../DB/model/notification.model.js";
 import { AppError } from "../../utils/AppError.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { AppResponse, globalSuccessHandler } from "../../utils/responseHandler.js";
+import { getIO } from "../../utils/socket.js";
 import { addLikeToPost, checkGroupExist, checkPostComment, checkPostExist, createPostData, deleteAllCommentForPost, deletedPost, getFriendsIds, getGroupIds, getPostsByUserAndFriends, getPostWithComments, isPostLikedByUser, removeLikeFromPost, updatePostData } from "./post.service.js";
 
 export const createPost = async (req, res, next) => {
@@ -28,6 +30,23 @@ export const createPost = async (req, res, next) => {
         req.body.image = images;
     }
     await createPostData(req.body);
+    const friendIds = await getFriendsIds(req.user._id);
+    const io = getIO();
+    if (friendIds.length > 0) {
+        await Promise.all(
+            friendIds.map(async friendId => {
+                const notification = await notificationModel.create({
+                    userId: friendId,
+                    content: `${req.user.userName} created a new post`,
+                    notificationType: 'post'
+                });
+
+                io.to(friendId.toString()).emit('newNotification', notification);
+
+                return notification;
+            })
+        );
+    }
     const response = new AppResponse('create post successfully', null, 201);
     return globalSuccessHandler(response, req, res);
 }
@@ -62,6 +81,15 @@ export const likePost = async (req, res, next) => {
     } else {
         await addLikeToPost(id, userId);
         message = "Post liked successfully";
+        if (post.userId.toString() !== userId.toString()) {
+            const notification = await notificationModel.create({
+                userId: post.userId,
+                content: `${req.user.userName} liked your post`,
+                notificationType: 'like',
+            });
+            const io = getIO();
+            io.to(post.userId.toString()).emit('newNotification', notification);
+        }
     }
 
     const response = new AppResponse(message, null, 200);
