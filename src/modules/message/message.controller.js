@@ -1,3 +1,4 @@
+import notificationModel from '../../../DB/model/notification.model.js';
 import { getIO } from '../../utils/socket.js';
 import * as messageService from './message.service.js';
 
@@ -20,6 +21,12 @@ export const sendMessageController = async (req, res, next) => {
         .to(populatedMessage.receiverId.slug)
         .emit('receiveMessage', populatedMessage);
 
+    const notification = await notificationModel.create({
+        userId: receiver._id,
+        content: `New message from ${sender.userName}`,
+        notificationType: 'message'
+    });
+    io.to(receiver.slug).emit('newNotification', notification);
     return res.status(201).json({ success: true, message: populatedMessage });
 };
 export const getMessagesController = async (req, res, next) => {
