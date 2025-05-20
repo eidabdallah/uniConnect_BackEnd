@@ -2,6 +2,9 @@ import { AppError } from "../../utils/AppError.js";
 import * as serviceFun from "./group.service.js";
 import { AppResponse, globalSuccessHandler } from './../../utils/responseHandler.js';
 import cloudinary from './../../utils/cloudinary.js';
+import notificationModel from './../../../DB/model/notification.model.js';
+import userModel from './../../../DB/model/user.model.js';
+import { getIO } from "../../utils/socket.js";
 
 export const getUserGroups = async (req, res, next) => {
     const groups = await serviceFun.getGroupsUsers(req.user._id);
@@ -97,6 +100,16 @@ export const joinGroupRequest = async (req, res, next) => {
     const existingRequest = await serviceFun.checkExistingRequest(groupId, req.user._id);
     if (existingRequest) return next(new AppError("You already have a pending or processed request", 400));
     await serviceFun.createRequestForGroup(groupId, req.user._id);
+
+    const owner = await userModel.findById(group.ownerId).select('slug');
+    const notification = await notificationModel.create({
+        userId: group.ownerId,
+        content: `${req.user.userName} requested to join your group "${group.name}"`,
+        notificationType: 'group_join_request'
+    });
+    const io = getIO();
+    io.to(owner.slug).emit('newNotification', notification);
+
     const response = new AppResponse("Join request sent successfully", null, 201);
     return globalSuccessHandler(response, req, res);
 };
@@ -122,7 +135,7 @@ export const handleJoinRequestDecision = async (req, res, next) => {
     const { action } = req.body;
     const request = await serviceFun.checkRequestExist(requestId);
     if (!request) return next(new AppError("Request not found", 404));
-
+    
     const group = request.groupId;
     if (group.ownerId.toString() !== req.user._id.toString()) {
         return next(new AppError("Unauthorized to modify this request", 403));
@@ -131,6 +144,16 @@ export const handleJoinRequestDecision = async (req, res, next) => {
         await serviceFun.addUserToGroup(group._id, request.userId);
     }
     await serviceFun.deleteRequestById(requestId);
+    
+    const targetUser = await userModel.findById(request.userId).select('slug');
+    const notification = await notificationModel.create({
+        userId: request.userId,
+        content: `Your request to join "${group.name}" has been ${action}.`,
+        notificationType: 'group_request_response'
+    });
+    const io = getIO();
+    io.to(targetUser.slug).emit('newNotification', notification);
+
     const response = new AppResponse(`Request ${action === 'accepted' ? 'accepted' : 'rejected'} successfully`, null, 200);
     return globalSuccessHandler(response, req, res);
 };
