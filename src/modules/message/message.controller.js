@@ -23,7 +23,7 @@ export const sendMessageController = async (req, res, next) => {
 
     const notification = await notificationModel.create({
         userId: receiver._id,
-        content: `New message from ${sender.userName}`,
+        content: `New message from ${receiver.userName}`,
         notificationType: 'message'
     });
     io.to(receiver.slug).emit('newNotification', notification);
